@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Froggy Jumps 🐸 — Game Edukasi Matematika</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+  body{
+    font-family:'Baloo 2','Comic Sans MS',system-ui,sans-serif;
+    background:radial-gradient(circle at 20% 0%,#1b7a52,#06392a 65%),#06392a;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:14px;color:#123;
+  }
+  .app{width:min(900px,100%)}
+
+  /* ---------- SCREEN ---------- */
+  .screen{display:none}
+  .screen.active{display:block;animation:fadeIn .35s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .card{
+    background:#f7fcf5;border-radius:26px;padding:22px;
+    box-shadow:0 18px 45px rgba(0,0,0,.4);
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    border:none;cursor:pointer;font-family:inherit;font-weight:800;
+    padding:15px 32px;border-radius:999px;font-size:1.1rem;color:#fff;
+    transition:transform .12s,box-shadow .12s;letter-spacing:.3px;
+    touch-action:manipulation;
+  }
+  .btn-primary{background:linear-gradient(180deg,#5ec45e,#2e7d32);box-shadow:0 6px 0 #1b5e20}
+  .btn-secondary{background:linear-gradient(180deg,#4aa8f0,#1565c0);box-shadow:0 6px 0 #0d47a1}
+  .btn-primary:active,.btn-secondary:active{transform:translateY(4px)}
+  .btn-primary:active{box-shadow:0 2px 0 #1b5e20}
+  .btn-secondary:active{box-shadow:0 2px 0 #0d47a1}
+  .btn-sm{padding:10px 20px;font-size:.95rem}
+
+  .icon-btn{
+    width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+    background:#e3f4e0;font-size:1.2rem;display:grid;place-items:center;
+    transition:background .15s,transform .15s;flex:0 0 auto;
+  }
+  .icon-btn:hover{background:#cdebca;transform:scale(1.06)}
+
+  /* ---------- MENU ---------- */
+  .menu-card,.result-card{text-align:center;padding:34px 22px}
+  .logo{font-size:74px;line-height:1;animation:bounce 1.8s ease-in-out infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  .menu-card h1{font-size:clamp(2rem,7vw,2.9rem);color:#2e7d32;margin-top:8px;letter-spacing:1px}
+  .tagline{color:#4b6b57;margin:8px 0 18px;font-size:1.02rem}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:26px}
+  .chip{background:#e3f4e0;color:#2e7d32;padding:7px 15px;border-radius:999px;font-weight:700;font-size:.88rem}
+  .menu-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+  /* ---------- MATERI ---------- */
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .topbar h2{font-size:1.35rem;color:#2e7d32;flex:1}
+
+  .materi-body{max-height:66vh;overflow-y:auto;padding-right:8px}
+  .materi-body::-webkit-scrollbar{width:9px}
+  .materi-body::-webkit-scrollbar-thumb{background:#b9dfb4;border-radius:9px}
+
+  .m-block{border-radius:18px;padding:16px 18px;margin-bottom:14px;border-left:7px solid}
+  .m-block h3{font-size:1.12rem;margin-bottom:8px}
+  .m-block p,.m-block li{font-size:.97rem;line-height:1.6;color:#2a3b31}
+  .m-block ul{margin-left:20px;margin-top:6px}
+  .m-block li{margin-bottom:4px}
+  .m-block code{
+    background:#fff;border-radius:8px;padding:2px 8px;font-family:inherit;
+    font-weight:800;color:#1565c0;display:inline-block;
+  }
+  .m-ex{background:#fff;border-radius:12px;padding:10px 14px;margin-top:10px;
+        font-weight:700;color:#1b5e20;font-size:.95rem;line-height:1.7}
+  .m1{border-color:#42a5f5;background:#eaf4ff}
+  .m2{border-color:#ef476f;background:#ffeef2}
+  .m3{border-color:#ffa726;background:#fff5e3}
+  .m4{border-color:#7e57c2;background:#f2edff}
+  .m5{border-color:#26a69a;background:#e6f7f5}
+
+  .tabel-wrap{overflow-x:auto;background:#fff;border-radius:14px;padding:10px}
+  .tk-row{display:grid;grid-template-columns:repeat(11,minmax(30px,1fr));gap:2px}
+  .tk-cell{
+    text-align:center;font-size:.78rem;padding:5px 0;border-radius:6px;
+    background:#f1f9ef;color:#2a3b31;font-weight:600;
+  }
+  .tk-head .tk-cell{background:#2e7d32;color:#fff;font-weight:800}
+  .tk-x{background:#ffd166;color:#5b3c00;font-weight:800}
+
+  /* ---------- GAME ---------- */
+  .game-card{padding:14px;transition:opacity .25s ease}
+  .game-card.fade{opacity:0}
+  .hud{display:flex;gap:8px;align-items:center;flex:1;justify-content:flex-end;flex-wrap:wrap}
+  .hud span{background:#e8f6e7;padding:7px 15px;border-radius:999px;font-weight:800;font-size:.92rem;color:#1b5e20;white-space:nowrap}
+
+  .question-banner{
+    background:linear-gradient(180deg,#fff9e6,#ffe8a3);
+    color:#3d2b00;font-weight:800;font-size:clamp(1.3rem,5.5vw,1.9rem);
+    text-align:center;padding:11px;border-radius:18px;margin-top:12px;
+    box-shadow:0 5px 0 #e0b84a;letter-spacing:1px;
+    display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;
+  }
+  .question-banner .op{
+    display:inline-block;background:#ff6b6b;color:#fff;
+    border-radius:10px;padding:0 12px;line-height:1.4;
+    box-shadow:0 3px 0 #c92a2a;
+  }
+  .question-banner .eq{color:#d9480f}
+  .question-banner .qm{color:#d9480f}
+
+  .feedback{height:24px;text-align:center;font-weight:800;font-size:.92rem;margin:6px 0 2px}
+  .feedback.ok{color:#1b8a3a}
+  .feedback.no{color:#d62828}
+
+  /* ---------- SCENE ---------- */
+  .scene{
+    position:relative;
+    height:clamp(330px,52vh,430px);
+    border-radius:22px;
+    overflow:hidden;
+    background:linear-gradient(180deg,#9ddcff 0%,#c6efff 38%,#e6f9ff 66%,#cfeef8 100%);
+    box-shadow:inset 0 0 60px rgba(0,80,120,.12);
+    user-select:none;
+    touch-action:manipulation;
+    isolation:isolate;
+  }
+  .scene.shake{animation:sceneShake .42s}
+  @keyframes sceneShake{
+    0%,100%{transform:translateX(0)}
+    15%{transform:translateX(-9px) rotate(-.6deg)}
+    35%{transform:translateX(9px) rotate(.6deg)}
+    55%{transform:translateX(-6px)}
+    75%{transform:translateX(6px)}
+  }
+  .scene.flash-red::after{
+    content:'';position:absolute;inset:0;background:rgba(239,71,111,.28);
+    pointer-events:none;z-index:30;animation:flashOut .45s forwards;
+  }
+  @keyframes flashOut{from{opacity:1}to{opacity:0}}
+
+  .cloud{position:absolute;background:#fff;border-radius:50%;opacity:.85;filter:blur(.5px);z-index:1}
+  .cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%}
+  .c1{width:70px;height:26px;top:8%;left:8%}
+  .c1::before{width:40px;height:40px;top:-18px;left:8px}
+  .c1::after{width:30px;height:30px;top:-12px;left:36px}
+  .c2{width:92px;height:30px;top:16%;left:52%}
+  .c2::before{width:46px;height:46px;top:-22px;left:10px}
+  .c2::after{width:34px;height:34px;top:-14px;left:48px}
+  .c3{width:60px;height:22px;top:5%;left:78%}
+  .c3::before{width:34px;height:34px;top:-16px;left:6px}
+  .c3::after{width:26px;height:26px;top:-10px;left:30px}
+
+  .abyss{
+    position:absolute;left:0;right:0;bottom:0;height:44%;
+    background:linear-gradient(180deg,rgba(6,40,60,0) 0%,rgba(6,40,60,.82) 48%,#041420 100%);
+    z-index:2;
+    pointer-events:none;
+  }
+
+  .ledge{
+    position:absolute;left:0;bottom:0;width:30%;height:36%;
+    background:linear-gradient(180deg,#86d158 0%,#63b23c 16%,#7a5230 16%,#5d3d22 55%,#432a16 100%);
+    border-radius:0 22px 0 0;
+    box-shadow:inset -8px 0 18px rgba(0,0,0,.28),inset 0 3px 0 rgba(255,255,255,.28);
+    z-index:3;
+  }
+  .ledge::after{
+    content:'';position:absolute;left:0;right:0;top:0;height:16%;
+    border-radius:0 22px 0 0;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 6px,transparent 6px 14px);
+  }
+
+  .pads-layer{position:absolute;inset:0;pointer-events:none;z-index:4}
+  .pad-slot{
+    position:absolute;transform:translate(-50%,-50%);
+    display:grid;place-items:center;pointer-events:auto;
+    transition:opacity .3s,transform .3s;
+  }
+
+  .pad{
+    width:clamp(50px,13.5vw,78px);
+    height:clamp(50px,13.5vw,78px);
+    border-radius:50%;
+    border:4px solid #2e7d32;
+    background:radial-gradient(circle at 30% 25%,#c3f59a,#6cc04a 55%,#3d8b2e 100%);
+    color:#fff;font-family:inherit;font-weight:800;
+    font-size:clamp(.95rem,4vw,1.4rem);
+    text-shadow:0 2px 3px rgba(0,0,0,.45);
+    box-shadow:0 7px 0 #256b22,0 14px 20px rgba(0,0,0,.3),inset 0 -4px 10px rgba(0,0,0,.18);
+    cursor:pointer;display:grid;place-items:center;padding:0;
+    transition:transform .15s,box-shadow .15s,background .25s;
+    animation:padPop .42s cubic-bezier(.34,1.56,.64,1) backwards;
+    touch-action:manipulation;
+  }
+  .pad:hover:not(:disabled){transform:translateY(-6px) scale(1.06)}
+  .pad:disabled{cursor:default}
+  .pad.correct{
+    background:radial-gradient(circle at 30% 25%,#d4ffe4,#2ecc71 55%,#0f9d58 100%);
+    box-shadow:0 0 0 9px rgba(46,204,113,.35),0 7px 0 #0f7d3a;
+    animation:popWin .5s;
+  }
+  .pad.wrong{
+    background:radial-gradient(circle at 30% 25%,#ffb3b3,#ef476f 55%,#a4133c 100%);
+    box-shadow:0 0 0 9px rgba(239,71,111,.3),0 7px 0 #8c0f31;
+    animation:shakePad .42s;
+  }
+  .pad.vanish{animation:vanishPad .5s forwards}
+
+  @keyframes padPop{from{transform:scale(0) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+  @keyframes popWin{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
+  @keyframes shakePad{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-7px) rotate(-4deg)}
+    40%{transform:translateX(7px) rotate(4deg)}
+    60%{transform:translateX(-5px)}
+    80%{transform:translateX(5px)}
+  }
+  @keyframes vanishPad{
+    0%{transform:scale(1) rotate(0);opacity:1}
+    40%{transform:scale(1.18) rotate(-12deg);opacity:.85}
+    100%{transform:scale(.15) translateY(70px) rotate(110deg);opacity:0}
+  }
+
+  .frog{
+    position:absolute;
+    width:clamp(48px,13vw,64px);
+    height:clamp(48px,13vw,64px);
+    font-size:clamp(38px,10.5vw,52px);
+    line-height:1;
+    display:grid;place-items:center;
+    z-index:6;
+    filter:drop-shadow(0 6px 5px rgba(0,0,0,.32));
+    pointer-events:none;
+    will-change:left,top,transform,opacity;
+  }
+
+  .fx-layer{position:absolute;inset:0;pointer-events:none;z-index:20}
+
+  .pop{
+    position:absolute;transform:translate(-50%,-50%);
+    font-weight:900;font-size:1.5rem;
+    text-shadow:0 3px 8px rgba(0,0,0,.45),0 0 3px #fff;
+    pointer-events:none;white-space:nowrap;
+    animation:floatUp .95s ease-out forwards;
+  }
+  @keyframes floatUp{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+    25%{opacity:1;transform:translate(-50%,-120%) scale(1.2)}
+    100%{opacity:0;transform:translate(-50%,-270%) scale(1)}
+  }
+
+  .puff{
+    position:absolute;transform:translate(-50%,-50%);
+    font-size:2rem;pointer-events:none;z-index:19;
+    animation:puffOut .7s ease-out forwards;
+  }
+  @keyframes puffOut{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+    30%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}
+    100%{opacity:0;transform:translate(-50%,-80%) scale(1.7)}
+  }
+
+  /* ---------- RESULT ---------- */
+  .result-card h2{font-size:clamp(1.6rem,6vw,2.2rem);color:#2e7d32;margin-top:6px}
+  .result-score{font-size:1.4rem;font-weight:800;color:#1565c0;margin:12px 0}
+  .result-msg{color:#4b6b57;margin-bottom:22px;font-size:1rem}
+  .stars{font-size:2rem;letter-spacing:6px;margin-bottom:6px}
+
+  @media (max-width:420px){
+    .card{padding:16px}
+    .game-card{padding:10px}
+    .pad{border-width:3px}
+    .btn{padding:13px 26px;font-size:1rem}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= MENU ================= -->
+  <section id="menu" class="screen active">
+    <div class="card menu-card">
+      <div class="logo">🐸</div>
+      <h1>Froggy Jumps</h1>
+      <p class="tagline">Lompat ke daun yang benar — salah lompat, katak jatuh ke jurang!</p>
+      <div class="chips">
+        <span class="chip">➕ Penjumlahan</span>
+        <span class="chip">➖ Pengurangan</span>
+        <span class="chip">✖️ Perkalian</span>
+        <span class="chip">➗ Pembagian</span>
+      </div>
+      <div class="menu-buttons">
+        <button class="btn btn-secondary" id="btnMateri">📖 Materi</button>
+        <button class="btn btn-primary" id="btnPlay">🎮 Play Game</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MATERI ================= -->
+  <section id="materi" class="screen">
+    <div class="card">
+      <div class="topbar">
+        <button class="icon-btn" id="btnBackFromMateri">←</button>
+        <h2>📖 Ringkasan Materi</h2>
+        <button class="btn btn-primary btn-sm" id="btnPlayFromMateri">🎮 Play Game</button>
+      </div>
+
+      <div class="materi-body">
+
+        <div class="m-block m1">
+          <h3>➕ 1. Penjumlahan ( + )</h3>
+          <p>Penjumlahan artinya <b>menggabungkan</b> dua bilangan atau lebih menjadi satu bilangan.</p>
+          <ul>
+            <li><b>Komutatif (pertukaran):</b> <code>a + b = b + a</code> → 7 + 5 = 5 + 7 = 12</li>
+            <li><b>Asosiatif (pengelompokan):</b> <code>(a + b) + c = a + (b + c)</code></li>
+            <li>Penjumlahan dengan 0 hasilnya tetap: <code>9 + 0 = 9</code></li>
+          </ul>
+          <div class="m-ex">
+            Contoh: 48 + 27 = ?<br>
+            Satuan: 8 + 7 = 15 → tulis <b>5</b>, simpan <b>1</b><br>
+            Puluhan: 4 + 2 + 1 (simpanan) = <b>7</b><br>
+            Jadi 48 + 27 = <b>75</b>
+          </div>
+        </div>
+
+        <div class="m-block m2">
+          <h3>➖ 2. Pengurangan ( − )</h3>
+          <p>Pengurangan artinya <b>mengambil sebagian</b> dari suatu bilangan.</p>
+          <ul>
+            <li><b>Tidak komutatif:</b> <code>9 − 4 ≠ 4 − 9</code></li>
+            <li>Mengurangi dengan 0 hasilnya tetap: <code>15 − 0 = 15</code></li>
+            <li>Hasil dikurangi hasil = 0: <code>a − a = 0</code></li>
+          </ul>
+          <div class="m-ex">
+            Contoh: 62 − 35 = ?<br>
+            Satuan: 2 tidak bisa dikurangi 5 → <b>pinjam 1 puluhan</b> → 12 − 5 = <b>7</b><br>
+            Puluhan: 6 sudah dipinjam 1 jadi 5 → 5 − 3 = <b>2</b><br>
+            Jadi 62 − 35 = <b>27</b><br>
+            ✔ Cek: 27 + 35 = 62 (benar!)
+          </div>
+        </div>
+
+        <div class="m-block m3">
+          <h3>✖️ 3. Perkalian ( × )</h3>
+          <p>Perkalian adalah <b>penjumlahan berulang</b>.</p>
+          <ul>
+            <li><code>4 × 3 = 3 + 3 + 3 + 3 = 12</code></li>
+            <li><b>Komutatif:</b> <code>a × b = b × a</code> → 6 × 7 = 7 × 6 = 42</li>
+            <li><b>Distributif:</b> <code>a × (b + c) = (a × b) + (a × c)</code></li>
+            <li>Kali 10 / 100 → tambah nol: <code>7 × 10 = 70</code>, <code>7 × 100 = 700</code></li>
+            <li>Semua bilangan × 0 = 0</li>
+          </ul>
+          <div class="m-ex">
+            Contoh: 6 × 12 = ?<br>
+            Pecah: 6 × (10 + 2) = (6 × 10) + (6 × 2) = 60 + 12 = <b>72</b>
+          </div>
+        </div>
+
+        <div class="m-block m4">
+          <h3>➗ 4. Pembagian ( ÷ )</h3>
+          <p>Pembagian adalah <b>kebalikan dari perkalian</b> — membagi rata.</p>
+          <ul>
+            <li><code>12 ÷ 3 = 4</code> karena <code>3 × 4 = 12</code></li>
+            <li><b>Tidak komutatif:</b> <code>12 ÷ 3 ≠ 3 ÷ 12</code></li>
+            <li><code>a ÷ 1 = a</code> &nbsp;•&nbsp; <code>a ÷ a = 1</code> (a ≠ 0)</li>
+            <li>Pembagian dengan 0 <b>tidak terdefinisi</b></li>
+          </ul>
+          <div class="m-ex">
+            Contoh: 56 ÷ 8 = ?<br>
+            Tanya: 8 dikali berapa hasilnya 56? → 8 × 7 = 56<br>
+            Jadi 56 ÷ 8 = <b>7</b>
+          </div>
+        </div>
+
+        <div class="m-block m5">
+          <h3>🔢 5. Urutan Operasi Hitung</h3>
+          <ul>
+            <li>Kerjakan <b>× dan ÷ lebih dulu</b>, baru + dan −</li>
+            <li>Jika ada tanda kurung ( ), kerjakan <b>kurung dulu</b></li>
+          </ul>
+          <div class="m-ex">
+            5 + 3 × 4 = 5 + 12 = <b>17</b><br>
+            (5 + 3) × 4 = 8 × 4 = <b>32</b>
+          </div>
+        </div>
+
+        <div class="m-block m3">
+          <h3>📊 Tabel Perkalian 1 – 10</h3>
+          <div class="tabel-wrap"><div id="tabelKali"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="game" class="screen">
+    <div class="card game-card" id="gameCard">
+      <div class="topbar">
+        <button class="icon-btn" id="btnHome" title="Menu">🏠</button>
+        <div class="hud">
+          <span id="hudScore">⭐ 0</span>
+          <span id="hudLives">❤️❤️❤️</span>
+          <span id="hudQ">Soal 1/10</span>
+        </div>
+      </div>
+
+      <div class="question-banner" id="questionText">Siap?</div>
+      <div class="feedback" id="feedback"></div>
+
+      <div class="scene" id="scene">
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+        <div class="abyss"></div>
+        <div class="ledge" id="ledge"></div>
+        <div class="pads-layer" id="padsLayer"></div>
+        <div class="frog" id="frog" style="opacity:0">🐸</div>
+        <div class="fx-layer" id="fxLayer"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESULT ================= -->
+  <section id="result" class="screen">
+    <div class="card result-card">
+      <div class="logo" id="resultEmoji">🏆</div>
+      <h2 id="resultTitle">Hebat!</h2>
+      <div class="stars" id="resultStars">⭐⭐⭐</div>
+      <div class="result-score" id="resultScore">Skor: 0</div>
+      <p class="result-msg" id="resultMsg"></p>
+      <div class="menu-buttons">
+        <button class="btn btn-secondary" id="btnResultMenu">🏠 Menu</button>
+        <button class="btn btn-primary" id="btnResultPlay">🔁 Main Lagi</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ================= UTIL ================= */
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rnd = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const shuffle = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+let actx = null;
+function beep(freq, dur = 0.12, type = 'sine') {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
+    o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(0.07, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.start(); o.stop(actx.currentTime + dur);
+  } catch (e) {}
+}
+
+/* ================= NAVIGASI ================= */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+/* ================= TABEL PERKALIAN ================= */
+(function buildTable() {
+  let html = '<div class="tk-row tk-head"><div class="tk-cell tk-x">×</div>';
+  for (let i = 1; i <= 10; i++) html += `<div class="tk-cell">${i}</div>`;
+  html += '</div>';
+  for (let r = 1; r <= 10; r++) {
+    html += `<div class="tk-row"><div class="tk-cell tk-x">${r}</div>`;
+    for (let c = 1; c <= 10; c++) html += `<div class="tk-cell">${r * c}</div>`;
+    html += '</div>';
+  }
+  $('tabelKali').innerHTML = html;
+})();
+
+/* ================= ELEMEN ================= */
+const scene      = $('scene');
+const frog       = $('frog');
+const ledgeEl    = $('ledge');
+const padsLayer  = $('padsLayer');
+const fxLayer    = $('fxLayer');
+const questionText = $('questionText');
+const feedbackEl = $('feedback');
+const hudScore   = $('hudScore');
+const hudLives   = $('hudLives');
+const hudQ       = $('hudQ');
+const gameCard   = $('gameCard');
+
+/* ================= KONFIGURASI ================= */
+const TOTAL_Q = 10;
+const START_LIVES = 3;
+
+const PAD_LAYOUT = [
+  { leftPct: 33, topPct: 46 },
+  { leftPct: 49, topPct: 32 },
+  { leftPct: 65, topPct: 47 },
+  { leftPct: 81, topPct: 33 }
+];
+
+/* ================= STATE ================= */
+let score = 0;
+let lives = START_LIVES;
+let qIndex = 0;
+let currentQ = null;
+let locked = true;
+let activePads = [];
+let frogPos = { x: 0, y: 0 };
+
+/* ================= GEOMETRI ================= */
+function inScene(el) {
+  const s = scene.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  return {
+    left: r.left - s.left,
+    top:  r.top  - s.top,
+    w: r.width,
+    h: r.height,
+    cx: r.left - s.left + r.width / 2,
+    cy: r.top  - s.top  + r.height / 2
+  };
+}
+
+function frogHomePos() {
+  const L = inScene(ledgeEl);
+  const fw = frog.offsetWidth;
+  const fh = frog.offsetHeight;
+  return {
+    x: L.left + L.w * 0.42 - fw / 2,
+    y: L.top - fh + 8
+  };
+}
+
+function setFrog(x, y) {
+  frog.style.left = x + 'px';
+  frog.style.top  = y + 'px';
+  frogPos = { x, y };
+}
+
+/* ================= ANIMASI ================= */
+function jumpTo(tx, ty, arc = 90, dur = 540) {
+  return new Promise(resolve => {
+    const fx = frogPos.x, fy = frogPos.y;
+    const mx = (fx + tx) / 2;
+    const my = Math.min(fy, ty) - arc;
+
+    frog.style.left = tx + 'px';
+    frog.style.top  = ty + 'px';
+
+    const a = frog.animate([
+      { left: fx + 'px', top: fy + 'px', transform: 'scale(1,1) rotate(0deg)' },
+      { left: mx + 'px', top: my + 'px', transform: 'scale(0.92,1.14) rotate(-10deg)', offset: 0.5 },
+      { left: tx + 'px', top: ty + 'px', transform: 'scale(1.1,0.9) rotate(0deg)', offset: 0.93 },
+      { left: tx + 'px', top: ty + 'px', transform: 'scale(1,1) rotate(0deg)' }
+    ], { duration: dur, easing: 'ease-in-out' });
+
+    a.onfinish = () => { frogPos = { x: tx, y: ty }; resolve(); };
+  });
+}
+
+function fallDown() {
+  return new Promise(resolve => {
+    const endY = scene.clientHeight + 140;
+    const a = frog.animate([
+      { top: frogPos.y + 'px', transform: 'rotate(0deg) scale(1)', opacity: 1 },
+      { top: (frogPos.y + 26) + 'px', transform: 'rotate(70deg) scale(.98)', opacity: 1, offset: .2 },
+      { top: endY + 'px', transform: 'rotate(560deg) scale(.4)', opacity: 0 }
+    ], { duration: 950, easing: 'cubic-bezier(0.4,0,0.9,0.6)' });
+
+    a.onfinish = () => { frog.style.opacity = '0'; resolve(); };
+  });
+}
+
+function victoryJump() {
+  return new Promise(resolve => {
+    const tx = scene.clientWidth + 140;
+    const ty = -150;
+    const fx = frogPos.x, fy = frogPos.y;
+
+    frog.style.left = tx + 'px';
+    frog.style.top  = ty + 'px';
+
+    const a = frog.animate([
+      { left: fx + 'px', top: fy + 'px', transform: 'scale(1) rotate(0deg)', opacity: 1 },
+      { left: (fx + 50) + 'px', top: (fy - 105) + 'px', transform: 'scale(1.25) rotate(-25deg)', opacity: 1, offset: .35 },
+      { left: tx + 'px', top: ty + 'px', transform: 'scale(.5) rotate(360deg)', opacity: 0 }
+    ], { duration: 780, easing: 'ease-in' });
+
+    a.onfinish = () => {
+      frog.style.opacity = '0';
+      frogPos = { x: tx, y: ty };
+      resolve();
+    };
+  });
+}
+
+async function frogAppear() {
+  const home = frogHomePos();
+  setFrog(home.x, home.y);
+  frog.style.opacity = '0';
+  await sleep(30);
+
+  const a = frog.animate([
+    { transform: 'translateY(-115px) scale(.75)', opacity: 0 },
+    { transform: 'translateY(0) scale(1.12,.88)', opacity: 1, offset: .78 },
+    { transform: 'translateY(0) scale(1,1)', opacity: 1 }
+  ], { duration: 460, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+
+  await new Promise(resolve => {
+    a.onfinish = () => { frog.style.opacity = '1'; resolve(); };
+  });
+}
+
+/* ================= EFEK ================= */
+function popText(cx, cy, text, color) {
+  const el = document.createElement('div');
+  el.className = 'pop';
+  el.textContent = text;
+  el.style.left = cx + 'px';
+  el.style.top  = cy + 'px';
+  el.style.color = color || '#2ecc71';
+  fxLayer.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+function puff(cx, cy) {
+  const el = document.createElement('div');
+  el.className = 'puff';
+  el.textContent = '💨';
+  el.style.left = cx + 'px';
+  el.style.top  = cy + 'px';
+  fxLayer.appendChild(el);
+  setTimeout(() => el.remove(), 720);
+}
+
+function shakeScene() {
+  scene.classList.add('shake');
+  setTimeout(() => scene.classList.remove('shake'), 430);
+}
+
+function flashRed() {
+  scene.classList.add('flash-red');
+  setTimeout(() => scene.classList.remove('flash-red'), 460);
+}
+
+/* ================= SOAL ================= */
+function generateQuestion() {
+  const ops = ['+', '-', '×', '÷'];
+  const op = ops[rnd(0, 3)];
+  let a, b, answer;
+
+  if (op === '+') {
+    a = rnd(5, 60); b = rnd(5, 60); answer = a + b;
+  } else if (op === '-') {
+    a = rnd(15, 80); b = rnd(2, a - 1); answer = a - b;
+  } else if (op === '×') {
+    a = rnd(2, 10); b = rnd(2, 10); answer = a * b;
+  } else {
+    b = rnd(2, 10); answer = rnd(2, 10); a = b * answer;
+  }
+
+  return { a, b, op, answer, options: makeOptions(answer) };
+}
+
+function makeOptions(answer) {
+  const set = new Set([answer]);
+  const spread = Math.max(3, Math.round(Math.abs(answer) * 0.25));
+  let guard = 0;
+
+  while (set.size < 4 && guard++ < 300) {
+    let delta = rnd(-spread, spread);
+    if (delta === 0) delta = 3;
+    let cand = answer + delta;
+    if (cand < 0) cand = answer + Math.abs(delta) + 1;
+    set.add(cand);
+  }
+  while (set.size < 4) set.add(answer + set.size * 3 + 1);
+
+  return shuffle([...set]);
+}
+
+/* ================= HUD ================= */
+function updateHUD() {
+  hudScore.textContent = '⭐ ' + score;
+  hudLives.textContent = '❤️'.repeat(Math.max(lives, 0)) || '💀';
+  hudQ.textContent = `Soal ${Math.min(qIndex + 1, TOTAL_Q)}/${TOTAL_Q}`;
+}
+
+/* ================= SETUP SOAL ================= */
+function setupQuestion() {
+  const q = currentQ;
+
+  questionText.innerHTML =
+    `${q.a} <span class="op">${q.op}</span> ${q.b} <span class="eq">=</span> <span class="qm">?</span>`;
+
+  feedbackEl.textContent = '';
+  feedbackEl.className = 'feedback';
+
+  // bangun daun jawaban
+  padsLayer.innerHTML = '';
+  activePads = [];
+
+  q.options.forEach((val, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'pad-slot';
+    slot.style.left = PAD_LAYOUT[i].leftPct + '%';
+    slot.style.top  = PAD_LAYOUT[i].topPct + '%';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pad';
+    btn.textContent = val;
+    btn.style.animationDelay = (i * 0.07) + 's';
+    btn.addEventListener('click', () => onPick(btn, val));
+
+    slot.appendChild(btn);
+    padsLayer.appendChild(slot);
+    activePads.push({ btn, val, slot });
+  });
+
+  // posisikan katak di tebing (belum tampil)
+  frog.style.opacity = '0';
+  const home = frogHomePos();
+  setFrog(home.x, home.y);
+
+  updateHUD();
+}
+
+async function startQuestion() {
+  if (scene.clientWidth === 0) {
+    requestAnimationFrame(startQuestion);
+    return;
+  }
+  setupQuestion();
+  await frogAppear();
+  locked = false;
+}
+
+/* ================= ALUR GAME ================= */
+function newGame() {
+  score = 0;
+  lives = START_LIVES;
+  qIndex = 0;
+  locked = true;
+  frog.style.opacity = '0';
+  gameCard.classList.remove('fade');
+
+  show('game');
+  updateHUD();
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    currentQ = generateQuestion();
+    startQuestion();
+  }));
+}
+
+async function advanceQuestion() {
+  await victoryJump();
+
+  gameCard.classList.add('fade');
+  await sleep(250);
+
+  qIndex++;
+  if (qIndex >= TOTAL_Q) {
+    gameCard.classList.remove('fade');
+    endGame('done');
+    return;
+  }
+
+  currentQ = generateQuestion();
+  setupQuestion();
+
+  await sleep(40);
+  gameCard.classList.remove('fade');
+  await sleep(200);
+  await frogAppear();
+  locked = false;
+}
+
+async function onPick(btn, val) {
+  if (locked) return;
+  locked = true;
+  activePads.forEach(p => { p.btn.disabled = true; });
+
+  const correct = (val === currentQ.answer);
+  const target = inScene(btn);
+  const fw = frog.offsetWidth, fh = frog.offsetHeight;
+  const tx = target.cx - fw / 2;
+  const ty = target.cy - fh / 2;
+
+  beep(520, .08, 'triangle');
+  await jumpTo(tx, ty, 95, 540);
+
+  if (correct) {
+    btn.classList.add('correct');
+    score += 10;
+    updateHUD();
+    popText(target.cx, target.cy, '+10', '#1b8a3a');
+    beep(740, .1);
+    setTimeout(() => beep(1040, .14), 100);
+    feedbackEl.textContent = '✅ Benar! Katak melompat ke soal berikutnya!';
+    feedbackEl.className = 'feedback ok';
+
+    await sleep(700);
+    await advanceQuestion();
+
+  } else {
+    btn.classList.add('wrong');
+    shakeScene();
+    beep(170, .3, 'square');
+    feedbackEl.textContent = `❌ Salah! Katak jatuh ke jurang...`;
+    feedbackEl.className = 'feedback no';
+
+    await sleep(350);
+    puff(target.cx, target.cy);
+    btn.classList.add('vanish');
+    await sleep(230);
+
+    flashRed();
+    await fallDown();
+
+    lives--;
+    updateHUD();
+    await sleep(650);
+
+    if (lives <= 0) {
+      endGame('lives');
+      return;
+    }
+
+    // hapus pilihan salah, lalu bangkitkan katak
+    removePad(btn);
+    await sleep(150);
+    await frogAppear();
+
+    activePads.forEach(p => {
+      if (p.btn.isConnected) p.btn.disabled = false;
+    });
+    locked = false;
+    feedbackEl.textContent = 'Ayo coba lagi!';
+    feedbackEl.className = 'feedback';
+  }
+}
+
+function removePad(btn) {
+  const slot = btn.closest('.pad-slot');
+  if (slot) {
+    slot.style.opacity = '0';
+    slot.style.transform = 'translate(-50%,-50%) scale(.5)';
+    setTimeout(() => slot.remove(), 320);
+  }
+  activePads = activePads.filter(p => p.btn !== btn);
+}
+
+/* ================= RESULT ================= */
+function endGame(reason) {
+  locked = true;
+  show('result');
+
+  const max = TOTAL_Q * 10;
+  const stars =
+    score >= max * 0.9 ? '⭐⭐⭐' :
+    score >= max * 0.6 ? '⭐⭐' : '⭐';
+
+  $('resultStars').textContent = stars;
+  $('resultScore').textContent = `Skor: ${score} / ${max}`;
+
+  if (reason === 'lives') {
+    $('resultEmoji').textContent = '😢';
+    $('resultTitle').textContent = 'Katak Jatuh!';
+    $('resultMsg').textContent = 'Nyawa habis karena salah lompat. Baca materi lagi, lalu coba kembali ya!';
+  } else if (score >= max * 0.9) {
+    $('resultEmoji').textContent = '🏆';
+    $('resultTitle').textContent = 'Luar Biasa!';
+    $('resultMsg').textContent = 'Katak berhasil melompati semua soal dengan hebat! 🐸👑';
+  } else if (score >= max * 0.6) {
+    $('resultEmoji').textContent = '🎉';
+    $('resultTitle').textContent = 'Bagus Sekali!';
+    $('resultMsg').textContent = 'Sedikit lagi jadi juara. Ayo main lagi!';
+  } else {
+    $('resultEmoji').textContent = '💪';
+    $('resultTitle').textContent = 'Semangat!';
+    $('resultMsg').textContent = 'Belajar dari kesalahan. Baca materi lalu main lagi ya!';
+  }
+}
+
+/* ================= EVENTS ================= */
+$('btnMateri').addEventListener('click', () => show('materi'));
+$('btnPlay').addEventListener('click', newGame);
+$('btnBackFromMateri').addEventListener('click', () => show('menu'));
+$('btnPlayFromMateri').addEventListener('click', newGame);
+$('btnHome').addEventListener('click', () => show('menu'));
+$('btnResultMenu').addEventListener('click', () => show('menu'));
+$('btnResultPlay').addEventListener('click', newGame);
+
+/* Resize: reposisikan katak jika tidak sedang animasi */
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (!$('game').classList.contains('active')) return;
+    if (locked) return;
+    const home = frogHomePos();
+    setFrog(home.x, home.y);
+  }, 180);
+});
+</script>
+</body>
+</html>
